@@ -1,3 +1,17 @@
+name: Testes da API
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -23,7 +37,7 @@ jobs:
           --health-retries 5
 
     steps:
-      - name: Checkout do código
+      - name: Baixar o código
         uses: actions/checkout@v4
 
       - name: Configurar Node.js
@@ -46,6 +60,7 @@ jobs:
             sleep 2
           done
           cat /tmp/api.log
+          echo "A API não iniciou a tempo."
           exit 1
 
       - name: Executar testes
