@@ -1,51 +1,36 @@
 import { expect } from 'chai';
 import request from 'supertest';
+import { randomUUID } from 'node:crypto';
 import app from '../../../src/app.js';
 import { fazerLogin } from '../helpers/loginAdmin.js';
 
-/*
-describe('Login', () => {
-  it('deve retornar 200 quando o usuário e a senha forem corretos', async () => {
-    const loginResposta = await request(app)
-      .post('/api/auth/login')
-      .set('Content-Type', 'application/json')
-      .send({
-        email: 'admin@escola.com',
-        senha: 'admin123',
-      });
-
-    expect(loginResposta.status).to.equal(200);
-  });
-
-  it('deve retornar 401 quando o usuário e a senha forem incorretos', async () => {
-    const loginResposta = await request(app)
-      .post('/api/auth/login')
-      .set('Content-Type', 'application/json')
-      .send({
-        email: 'admin@escola.com',
-        senha: 'admin12354',
-      });
-
-    expect(loginResposta.status).to.equal(401);
-  });
-});
-*/
-
 describe('Cadastrar Alunos', () => {
-  it('deve retornar 200 quando cadastrar alunos corretos', async () => {
+  it('deve retornar 201 quando cadastrar um aluno com dados válidos', async () => {
     const token = await fazerLogin();
+    const identificador = randomUUID();
 
     const cadastroResposta = await request(app)
       .post('/api/admin/alunos')
       .set('Content-Type', 'application/json')
       .set('Authorization', `Bearer ${token}`)
       .send({
-       "nome": "Souza",
-       "email": "maria.souza@example.com",
-       "matricula": "2024003",
-       "senha": "123458"
+        nome: 'Souza',
+        email: `daniela.souza.${identificador}@example.com`,
+        matricula: identificador,
+        senha: '123458'
       });
 
-    expect(cadastroResposta.status).to.equal(200);
+    expect(
+      cadastroResposta.status,
+      `Resposta da API: ${JSON.stringify(cadastroResposta.body)}`
+    ).to.equal(201);
+
+    expect(cadastroResposta.body).to.have.property('id');
+    expect(cadastroResposta.body.nome).to.equal('Souza');
+    expect(cadastroResposta.body.email).to.equal(
+      `daniela.souza.${identificador}@example.com`
+    );
+    expect(cadastroResposta.body.matricula).to.equal(identificador);
+    expect(cadastroResposta.body).to.not.have.property('senha');
   });
 });
